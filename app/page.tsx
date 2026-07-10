@@ -1,65 +1,132 @@
-import Image from "next/image";
+"use client";
+
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
 
 export default function Home() {
+  const [announcements, setAnnouncements] = useState<any[]>([]);
+  const [loadingAnnouncements, setLoadingAnnouncements] = useState(true);
+  const [stats, setStats] = useState({ comps: 0, categories: 0, catNames: '' });
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const [annRes, compRes] = await Promise.all([
+          fetch('/api/announcements').then(res => res.json()),
+          fetch('/api/competitions').then(res => res.json())
+        ]);
+
+        if (annRes.success) {
+          setAnnouncements(annRes.data);
+        }
+        
+        if (compRes.success && compRes.data) {
+          const comps = compRes.data;
+          const categories = new Set<string>();
+          comps.forEach((c: any) => {
+            if (c.category) categories.add(c.category);
+          });
+          const catArray = Array.from(categories).slice(0, 3);
+          setStats({
+            comps: comps.length,
+            categories: categories.size,
+            catNames: catArray.join(' ')
+          });
+        }
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoadingAnnouncements(false);
+      }
+    }
+    loadData();
+  }, []);
+
+  const formatThaiDate = (dateString: string) => {
+    const d = new Date(dateString);
+    if (isNaN(d.getTime())) return dateString;
+    return d.toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' });
+  };
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+    <>
+      <section className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24 flex flex-col lg:flex-row items-center">
+          <div className="lg:w-1/2 z-10 text-center lg:text-left">
+              <span className="inline-block py-1 px-4 rounded-full bg-accent text-primary text-sm font-medium mb-4 shadow-sm">ปีการศึกษา 2569</span>
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-heading font-bold leading-tight mb-6">
+                  สัปดาห์วิทยาศาสตร์<br/>
+                  <span className="text-gradient">โรงเรียนวัชรวิทยา</span>
+              </h1>
+              <p className="text-slate-600 text-lg mb-8 max-w-2xl mx-auto lg:mx-0">
+                  เปิดประตูสู่โลกแห่งนวัตกรรมและการค้นพบ ร่วมสนุกกับกิจกรรมและการแข่งขันทางวิทยาศาสตร์มากมาย พร้อมชิงรางวัลสุดพิเศษ
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                  <Link href="/competitions" className="btn btn-primary"><i className='bx bx-rocket'></i> ดูรายการแข่งขัน</Link>
+                  <Link href="/schedule" className="btn btn-secondary"><i className='bx bx-calendar-event'></i> กำหนดการ</Link>
+              </div>
+          </div>
+          
+          <div className="lg:w-1/2 relative mt-16 lg:mt-0 w-full flex justify-center">
+              <div className="orb orb-1"></div>
+              <div className="orb orb-2"></div>
+              
+              {/* Floating Glass Cards */}
+              <div className="relative w-full max-w-md h-[400px]">
+                  <div className="glass-panel floating absolute top-10 right-0 p-6 rounded-2xl w-64">
+                      <div className="w-12 h-12 rounded-full bg-pink-100 text-primary flex items-center justify-center text-2xl mb-4">
+                          <i className='bx bx-trophy'></i>
+                      </div>
+                      <h3 className="font-bold text-xl mb-1"><span>{stats.comps || '10+'}</span> รายการ</h3>
+                      <p className="text-slate-500 text-sm">รายการแข่งขันสุดท้าทาย</p>
+                  </div>
+                  
+                  <div className="glass-panel floating floating-delay absolute bottom-10 left-0 p-6 rounded-2xl w-64">
+                      <div className="w-12 h-12 rounded-full bg-blue-100 text-secondary flex items-center justify-center text-2xl mb-4">
+                          <i className='bx bx-brain'></i>
+                      </div>
+                      <h3 className="font-bold text-xl mb-1"><span>{stats.categories || '3'}</span> หมวดหมู่</h3>
+                      <p className="text-slate-500 text-sm">{stats.catNames || 'วิชาการ โครงงาน นวัตกรรม'}</p>
+                  </div>
+              </div>
+          </div>
+      </section>
+
+      {/* Announcements Section */}
+      <section className="bg-white py-16 border-t border-slate-100">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="flex items-center gap-3 mb-8">
+                  <i className='bx bx-news text-3xl text-primary'></i>
+                  <h2 className="text-2xl font-bold font-heading">ข่าวประกาศ</h2>
+              </div>
+              
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  {loadingAnnouncements ? (
+                      <div className="animate-pulse flex space-x-4">
+                          <div className="flex-1 space-y-6 py-1">
+                            <div className="h-2 bg-slate-200 rounded"></div>
+                            <div className="space-y-3">
+                              <div className="grid grid-cols-3 gap-4">
+                                <div className="h-2 bg-slate-200 rounded col-span-2"></div>
+                                <div className="h-2 bg-slate-200 rounded col-span-1"></div>
+                              </div>
+                              <div className="h-2 bg-slate-200 rounded"></div>
+                            </div>
+                          </div>
+                      </div>
+                  ) : announcements.length === 0 ? (
+                      <p className="text-slate-500 col-span-full">ยังไม่มีข่าวประกาศในขณะนี้</p>
+                  ) : (
+                      announcements.map((ann) => (
+                          <div key={ann.id} className="glass-panel p-6 rounded-2xl border-l-4 border-l-primary hover:-translate-y-1 transition-transform duration-300">
+                              <span className="text-xs font-semibold text-secondary mb-2 block"><i className='bx bx-calendar'></i> {formatThaiDate(ann.date || ann.createdAt)}</span>
+                              <h3 className="font-bold text-lg mb-2 text-slate-800">{ann.title}</h3>
+                              <p className="text-slate-600 text-sm line-clamp-3">{ann.content}</p>
+                          </div>
+                      ))
+                  )}
+              </div>
+          </div>
+      </section>
+    </>
   );
 }

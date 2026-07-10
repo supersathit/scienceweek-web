@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>สัปดาห์วิทยาศาสตร์ โรงเรียนวัชรวิทยา</title>
+    <meta name="description" content="กิจกรรมสัปดาห์วิทยาศาสตร์ โรงเรียนวัชรวิทยา ร่วมแข่งขันและส่งผลงานออนไลน์">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="assets/js/tailwind-config.js"></script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .glass-panel {
+                @apply bg-white/70 backdrop-blur-lg border border-white/40 shadow-xl;
+            }
+            .text-gradient {
+                @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary;
+            }
+            .btn {
+                @apply inline-flex items-center gap-2 justify-center px-6 py-2.5 rounded-full font-medium transition-all duration-300;
+            }
+            .btn-primary {
+                @apply bg-gradient-to-r from-primary to-secondary text-white hover:shadow-lg hover:shadow-primary/30 hover:-translate-y-1;
+            }
+            .btn-secondary {
+                @apply bg-white text-dark shadow-md hover:shadow-lg hover:-translate-y-1;
+            }
+            .btn-outline {
+                @apply border-2 border-primary text-primary hover:bg-primary hover:text-white;
+            }
+        }
+    </style>
+</head>
+<body class="font-sans text-dark min-h-screen flex flex-col relative overflow-x-hidden">
+    <!-- Navbar -->
+    <header class="fixed top-0 w-full z-50 glass-panel border-b-0 border-x-0 border-t-0 rounded-none transition-all duration-300 py-3">
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
+            <a href="index.html" class="flex items-center gap-2 text-2xl font-heading font-bold text-gradient">
+                <i class='bx bx-atom text-primary'></i>
+                <span>ScienceWeek</span>
+            </a>
+            
+            <ul class="hidden md:flex space-x-8 text-sm font-medium">
+                <li><a href="index.html" class="text-primary font-semibold">หน้าแรก</a></li>
+                <li><a href="schedule.html" class="text-slate-600 hover:text-primary transition-colors">กำหนดการ</a></li>
+                <li><a href="competitions.html" class="text-slate-600 hover:text-primary transition-colors">รายการแข่งขัน</a></li>
+                <li><a href="register.html" class="text-slate-600 hover:text-primary transition-colors">สมัครแข่งขัน</a></li>
+                <li><a href="submit.html" class="text-slate-600 hover:text-primary transition-colors">ส่งผลงาน</a></li>
+            </ul>
+            
+            <div class="hidden md:flex items-center space-x-2">
+                <a href="register.html" class="btn btn-outline text-sm px-5 py-2">สมัครแข่งขัน</a>
+                <a href="admin.html" class="text-slate-400 hover:text-primary transition-colors text-xl p-2" title="Admin Dashboard"><i class='bx bx-cog'></i></a>
+            </div>
+            
+            <button class="md:hidden text-2xl text-slate-700 focus:outline-none"><i class='bx bx-menu'></i></button>
+        </nav>
+    </header>
+
+    <main class="flex-grow pt-24">
+        <!-- Hero Section -->
+        <section class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24 flex flex-col lg:flex-row items-center">
+            <div class="lg:w-1/2 z-10 text-center lg:text-left">
+                <span class="inline-block py-1 px-4 rounded-full bg-accent text-primary text-sm font-medium mb-4 shadow-sm">ปีการศึกษา 2569</span>
+                <h1 class="text-4xl sm:text-5xl lg:text-6xl font-heading font-bold leading-tight mb-6">
+                    สัปดาห์วิทยาศาสตร์<br>
+                    <span class="text-gradient">โรงเรียนวัชรวิทยา</span>
+                </h1>
+                <p class="text-slate-600 text-lg mb-8 max-w-2xl mx-auto lg:mx-0">
+                    เปิดประตูสู่โลกแห่งนวัตกรรมและการค้นพบ ร่วมสนุกกับกิจกรรมและการแข่งขันทางวิทยาศาสตร์มากมาย พร้อมชิงรางวัลสุดพิเศษ
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                    <a href="competitions.html" class="btn btn-primary"><i class='bx bx-rocket'></i> ดูรายการแข่งขัน</a>
+                    <a href="schedule.html" class="btn btn-secondary"><i class='bx bx-calendar-event'></i> กำหนดการ</a>
+                </div>
+            </div>
+            
+            <div class="lg:w-1/2 relative mt-16 lg:mt-0 w-full flex justify-center">
+                <div class="orb orb-1"></div>
+                <div class="orb orb-2"></div>
+                
+                <!-- Floating Glass Cards -->
+                <div class="relative w-full max-w-md h-[400px]">
+                    <div class="glass-panel floating absolute top-10 right-0 p-6 rounded-2xl w-64">
+                        <div class="w-12 h-12 rounded-full bg-pink-100 text-primary flex items-center justify-center text-2xl mb-4">
+                            <i class='bx bx-trophy'></i>
+                        </div>
+                        <h3 class="font-bold text-xl mb-1"><span id="stat-comp-count">10+</span> รายการ</h3>
+                        <p class="text-slate-500 text-sm">รายการแข่งขันสุดท้าทาย</p>
+                    </div>
+                    
+                    <div class="glass-panel floating floating-delay absolute bottom-10 left-0 p-6 rounded-2xl w-64">
+                        <div class="w-12 h-12 rounded-full bg-blue-100 text-secondary flex items-center justify-center text-2xl mb-4">
+                            <i class='bx bx-brain'></i>
+                        </div>
+                        <h3 class="font-bold text-xl mb-1"><span id="stat-cat-count">3</span> หมวดหมู่</h3>
+                        <p class="text-slate-500 text-sm" id="stat-cat-names">วิชาการ โครงงาน นวัตกรรม</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Announcements Section -->
+        <section class="bg-white py-16 border-t border-slate-100">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center gap-3 mb-8">
+                    <i class='bx bx-news text-3xl text-primary'></i>
+                    <h2 class="text-2xl font-bold font-heading">ข่าวประกาศ</h2>
+                </div>
+                
+                <div id="announcement-list" class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    <!-- Announcements injected via JS -->
+                    <div class="animate-pulse flex space-x-4">
+                        <div class="flex-1 space-y-6 py-1">
+                          <div class="h-2 bg-slate-200 rounded"></div>
+                          <div class="space-y-3">
+                            <div class="grid grid-cols-3 gap-4">
+                              <div class="h-2 bg-slate-200 rounded col-span-2"></div>
+                              <div class="h-2 bg-slate-200 rounded col-span-1"></div>
+                            </div>
+                            <div class="h-2 bg-slate-200 rounded"></div>
+                          </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-slate-300 py-10 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="text-center md:text-left">
+                <h3 class="text-white font-heading font-bold text-xl mb-2 flex items-center justify-center md:justify-start gap-2">
+                    <i class='bx bx-atom text-primary'></i> ScienceWeek
+                </h3>
+                <p class="text-sm">กลุ่มสาระการเรียนรู้วิทยาศาสตร์และเทคโนโลยี<br>โรงเรียนวัชรวิทยา</p>
+            </div>
+            <div class="text-center md:text-right text-sm">
+                <p>&copy; 2026 ScienceWeek Vacharawittaya. All rights reserved.</p>
+                <div class="mt-4 flex gap-4 justify-center md:justify-end text-xl">
+                    <a href="#" class="hover:text-primary transition-colors"><i class='bx bxl-facebook-circle'></i></a>
+                    <a href="#" class="hover:text-secondary transition-colors"><i class='bx bx-globe'></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/api.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            // 1. Load Announcements
+            const list = document.getElementById('announcement-list');
+            const res = await apiGet('getAnnouncements');
+            
+            if (res.success && res.data.length > 0) {
+                list.innerHTML = '';
+                // Show only published, newest first
+                const published = res.data.filter(a => a.published === true || String(a.published).toUpperCase() === 'TRUE').reverse();
+                
+                if (published.length === 0) {
+                    list.innerHTML = '<p class="text-slate-500 col-span-full">ยังไม่มีข่าวประกาศในขณะนี้</p>';
+                } else {
+                    published.forEach(ann => {
+                        const dispDate = formatThaiDateTime(ann.date || ann.created_at, false);
+                        list.innerHTML += `
+                            <div class="glass-panel p-6 rounded-2xl border-l-4 border-l-primary hover:-translate-y-1 transition-transform duration-300">
+                                <span class="text-xs font-semibold text-secondary mb-2 block"><i class='bx bx-calendar'></i> ${dispDate}</span>
+                                <h3 class="font-bold text-lg mb-2 text-slate-800">${ann.title}</h3>
+                                <p class="text-slate-600 text-sm line-clamp-3">${ann.content}</p>
+                            </div>
+                        `;
+                    });
+                }
+            } else {
+                list.innerHTML = '<p class="text-slate-500 col-span-full">ไม่สามารถโหลดข่าวประกาศได้</p>';
+            }
+
+            // 2. Load Stats for Floating Glass Cards
+            const compRes = await apiGet('getCompetitions');
+            if (compRes.success && compRes.data) {
+                const comps = compRes.data;
+                const countEl = document.getElementById('stat-comp-count');
+                if (countEl) countEl.textContent = comps.length;
+                
+                const categories = new Set();
+                comps.forEach(c => {
+                    if (c.category) categories.add(c.category);
+                });
+                
+                const catCountEl = document.getElementById('stat-cat-count');
+                if (catCountEl) catCountEl.textContent = categories.size;
+                
+                const catNamesEl = document.getElementById('stat-cat-names');
+                if (catNamesEl && categories.size > 0) {
+                    const catArray = Array.from(categories).slice(0, 3);
+                    catNamesEl.textContent = catArray.join(' ');
+                }
+            }
+        });
+    </script>
+</body>
+</html>

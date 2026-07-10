@@ -1,0 +1,126 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Announcement {
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String   @db.Text
+  published Boolean  @default(false)
+  date      DateTime @db.Date
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("announcements")
+}
+
+model Schedule {
+  id        Int      @id @default(autoincrement())
+  time      String
+  event     String
+  details   String?  @db.Text
+  location  String
+  date      DateTime @db.Date
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("schedule")
+}
+
+model Competition {
+  id              String   @id
+  title           String
+  category        String?
+  level           String
+  teamMin         Int?     @map("team_min")
+  teamMax         Int      @map("team_max")
+  description     String   @db.Text
+  rules           String?  @db.Text
+  judgingCriteria String?  @map("judging_criteria") @db.Text
+  location        String?
+  competitionDate String?  @map("competition_date")
+  registerOpen    Boolean  @default(false) @map("register_open")
+  submissionOpen  Boolean  @default(false) @map("submission_open")
+  imageUrl        String?  @map("image_url")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  registrations Registration[]
+  submissions   Submission[]
+
+  @@map("competitions")
+}
+
+model Registration {
+  registrationCode  String   @id @map("registration_code")
+  competitionId     String   @map("competition_id")
+  teamName          String?  @map("team_name")
+  leaderStudentCode String   @map("leader_student_code")
+  leaderFullName    String   @map("leader_full_name")
+  leaderClass       String   @map("leader_class")
+  leaderNumber      String   @map("leader_number")
+  contactPhone      String   @map("contact_phone")
+  membersJson       Json     @map("members_json")
+  status            String   @default("pending") // pending, approved, rejected
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  competition Competition  @relation(fields: [competitionId], references: [id])
+  submissions Submission[]
+
+  @@map("registrations")
+}
+
+model Submission {
+  submissionId     String   @id @map("submission_id")
+  registrationCode String   @map("registration_code")
+  competitionId    String   @map("competition_id")
+  workTitle        String   @map("work_title")
+  workDescription  String?  @db.Text @map("work_description")
+  fileUrl          String?  @map("file_url")
+  externalLink     String?  @map("external_link")
+  status           String   @default("submitted") // ส่งแล้ว, อนุมัติ ฯลฯ
+  submittedAt      DateTime @default(now()) @map("submitted_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  registration Registration @relation(fields: [registrationCode], references: [registrationCode])
+  competition  Competition  @relation(fields: [competitionId], references: [id])
+
+  @@map("submissions")
+}
+
+model Setting {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique
+  value     String   @db.Text
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("settings")
+}
+
+model AdminLog {
+  id        Int      @id @default(autoincrement())
+  adminName String?  @map("admin_name")
+  action    String
+  details   String?  @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("admin_logs")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  password  String   // รหัสผ่าน (แนะนำให้ Hash ก่อนบันทึก)
+  role      String   // ระบุเป็น "admin" หรือ "teacher" ตามระบบเดิม
+  name      String   // ชื่อ-นามสกุลของคุณครู
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}

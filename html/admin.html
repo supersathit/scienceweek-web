@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบจัดการ (Admin) - สัปดาห์วิทยาศาสตร์</title>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="assets/js/tailwind-config.js"></script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .glass-panel {
+                @apply bg-white/80 backdrop-blur-lg border border-white/40 shadow-xl;
+            }
+            .btn {
+                @apply inline-flex items-center justify-center px-4 py-2 rounded-lg font-medium transition-all duration-300 gap-2;
+            }
+            .btn-primary {
+                @apply bg-primary text-white hover:bg-primaryHover shadow-md hover:shadow-lg;
+            }
+            .btn-outline {
+                @apply border border-slate-300 text-slate-700 hover:bg-slate-50;
+            }
+            .form-control {
+                @apply w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all;
+            }
+            .form-group {
+                @apply mb-4;
+            }
+            .form-group label {
+                @apply block text-sm font-medium text-slate-700 mb-1;
+            }
+            .admin-table {
+                @apply w-full border-collapse bg-white rounded-lg overflow-hidden shadow-sm border border-slate-200 text-left;
+            }
+            .admin-table th {
+                @apply bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700 border-b border-slate-200;
+            }
+            .admin-table td {
+                @apply px-4 py-3 text-sm text-slate-600 border-b border-slate-100 align-middle;
+            }
+            .btn-icon {
+                @apply inline-flex items-center justify-center w-8 h-8 rounded text-lg transition-colors;
+            }
+            .btn-edit { @apply bg-amber-50 text-amber-600 hover:bg-amber-100 border border-amber-200; }
+            .btn-delete { @apply bg-red-50 text-red-600 hover:bg-red-100 border border-red-200; }
+            .btn-view { @apply bg-blue-50 text-secondary hover:bg-blue-100 border border-blue-200; }
+            .status-toggle {
+                @apply px-3 py-1 rounded-full text-xs font-semibold cursor-pointer border transition-colors;
+            }
+            .status-on { @apply bg-green-50 text-green-700 border-green-200 hover:bg-green-100; }
+            .status-off { @apply bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100; }
+            
+            /* Admin Layout */
+            .admin-layout {
+                @apply flex h-screen bg-slate-100 overflow-hidden;
+            }
+            .admin-sidebar {
+                @apply w-64 bg-white border-r border-slate-200 flex flex-col flex-shrink-0 z-20;
+            }
+            .admin-main {
+                @apply flex-grow p-4 md:p-8 overflow-y-auto;
+            }
+            .nav-item {
+                @apply flex items-center gap-3 px-6 py-3 text-slate-600 hover:bg-slate-50 cursor-pointer border-l-4 border-transparent transition-all;
+            }
+            .nav-item.active {
+                @apply bg-pink-50 text-primary border-primary font-medium;
+            }
+            
+            /* Modal */
+            .modal-overlay {
+                @apply fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300;
+            }
+            .modal-overlay.active {
+                @apply opacity-100 pointer-events-auto;
+            }
+            .modal-content {
+                @apply bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden transform scale-95 transition-transform duration-300 flex flex-col max-h-[90vh];
+            }
+            .modal-overlay.active .modal-content {
+                @apply scale-100;
+            }
+        }
+    </style>
+</head>
+<body class="font-sans text-dark bg-slate-50">
+
+    <!-- Login Screen -->
+    <div id="login-screen" class="min-h-screen flex items-center justify-center p-4">
+        <div class="glass-panel p-8 rounded-2xl w-full max-w-sm border-t-4 border-t-primary">
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-pink-50 text-primary rounded-full flex items-center justify-center text-3xl mx-auto mb-4 shadow-sm border border-pink-100">
+                    <i class='bx bx-lock-alt'></i>
+                </div>
+                <h1 class="text-2xl font-bold font-heading text-slate-800">Admin Login</h1>
+            </div>
+            
+            <form id="login-form">
+                <div class="form-group mb-4">
+                    <label>ชื่อผู้ใช้งาน (Username)</label>
+                    <input type="text" id="admin-user" class="form-control bg-white" required placeholder="กรอกชื่อผู้ใช้งาน">
+                </div>
+                <div class="form-group">
+                    <label>รหัสผ่าน (Password)</label>
+                    <input type="password" id="admin-pass" class="form-control bg-white" required placeholder="กรอกรหัสผ่าน">
+                </div>
+                <button type="submit" class="btn btn-primary w-full mt-4">เข้าสู่ระบบ</button>
+                <div class="text-center mt-6">
+                    <a href="index.html" class="text-slate-500 hover:text-primary text-sm flex items-center justify-center gap-1 transition-colors"><i class='bx bx-arrow-back'></i> กลับไปหน้าหลัก</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Dashboard Screen -->
+    <div id="dashboard-screen" class="admin-layout hidden">
+        <!-- Sidebar -->
+        <aside class="admin-sidebar shadow-lg md:shadow-none">
+            <div class="h-16 flex items-center px-6 border-b border-slate-200">
+                <a href="index.html" class="flex items-center gap-2 text-xl font-heading font-bold text-primary">
+                    <i class='bx bx-atom'></i>
+                    <span>AdminPanel</span>
+                </a>
+            </div>
+            <nav class="flex-grow py-4">
+                <div class="nav-item active" data-target="panel-competitions">
+                    <i class='bx bx-trophy text-xl'></i> จัดการการแข่งขัน
+                </div>
+                <div class="nav-item admin-only" data-target="panel-announcements">
+                    <i class='bx bx-news text-xl'></i> จัดการข่าวประกาศ
+                </div>
+                <div class="nav-item admin-only" data-target="panel-schedule">
+                    <i class='bx bx-calendar text-xl'></i> กำหนดการ
+                </div>
+                <div class="nav-item" data-target="panel-registrations">
+                    <i class='bx bx-group text-xl'></i> ข้อมูลผู้สมัคร
+                </div>
+                <div class="nav-item" data-target="panel-submissions">
+                    <i class='bx bx-upload text-xl'></i> ส่งผลงาน
+                </div>
+                <div class="nav-item admin-only" data-target="panel-settings">
+                    <i class='bx bx-cog text-xl'></i> การตั้งค่าเว็บ
+                </div>
+            </nav>
+            <div class="p-4 border-t border-slate-200">
+                <button id="btn-logout" class="flex items-center gap-2 text-red-500 hover:text-red-700 hover:bg-red-50 w-full px-4 py-2 rounded-lg transition-colors">
+                    <i class='bx bx-log-out text-xl'></i> ออกจากระบบ
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="admin-main">
+            <!-- Panel: Competitions -->
+            <section id="panel-competitions" class="admin-section">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                    <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2 font-heading"><i class='bx bx-trophy text-primary'></i> รายการแข่งขัน</h2>
+                    <button class="btn btn-primary" id="btn-add-comp"><i class='bx bx-plus'></i> เพิ่มรายการใหม่</button>
+                </div>
+                
+                <div class="overflow-x-auto rounded-lg shadow-sm border border-slate-200 bg-white">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>รหัส</th>
+                                <th>ชื่อการแข่งขัน</th>
+                                <th>รับสมัคร</th>
+                                <th>ส่งผลงาน</th>
+                                <th class="w-32">จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="comp-table-body">
+                            <tr><td colspan="5" class="text-center py-8">กำลังโหลดข้อมูล...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Panel: Announcements -->
+            <section id="panel-announcements" class="admin-section hidden">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                    <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2 font-heading"><i class='bx bx-news text-primary'></i> ข่าวประกาศ</h2>
+                    <button class="btn btn-primary" id="btn-add-ann"><i class='bx bx-plus'></i> เขียนข่าวใหม่</button>
+                </div>
+                
+                <div class="overflow-x-auto rounded-lg shadow-sm border border-slate-200 bg-white">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>รหัส</th>
+                                <th>วันที่</th>
+                                <th>หัวข้อข่าว</th>
+                                <th>สถานะ</th>
+                                <th class="w-24">จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ann-table-body">
+                            <tr><td colspan="5" class="text-center py-8">กำลังโหลดข้อมูล...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Panel: Registrations -->
+            <section id="panel-registrations" class="admin-section hidden">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                    <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2 font-heading"><i class='bx bx-group text-primary'></i> ข้อมูลผู้สมัคร</h2>
+                    <div class="flex gap-2 w-full sm:w-auto">
+                        <select id="reg-comp-filter" class="form-control !mb-0 min-w-[200px] shadow-sm">
+                            <option value="">-- เลือกรายการแข่งขัน --</option>
+                        </select>
+                        <button class="btn btn-outline bg-white flex-shrink-0 shadow-sm" id="btn-refresh-reg"><i class='bx bx-refresh'></i></button>
+                    </div>
+                </div>
+                
+                <div class="overflow-x-auto rounded-lg shadow-sm border border-slate-200 bg-white">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>รหัสสมัคร</th>
+                                <th>ชื่อทีม</th>
+                                <th>ผู้ติดต่อ (เบอร์)</th>
+                                <th>สมาชิก</th>
+                                <th>วันที่สมัคร</th>
+                                <th class="w-24">จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reg-table-body">
+                            <tr><td colspan="6" class="text-center py-8">กรุณาเลือกรายการแข่งขันเพื่อดูผู้สมัคร</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Panel: Schedule -->
+            <section id="panel-schedule" class="admin-section hidden">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                    <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2 font-heading"><i class='bx bx-calendar text-primary'></i> กำหนดการ</h2>
+                    <button class="btn btn-primary" id="btn-add-schedule"><i class='bx bx-plus'></i> เพิ่มกำหนดการ</button>
+                </div>
+                
+                <div class="overflow-x-auto rounded-lg shadow-sm border border-slate-200 bg-white">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>รหัส</th>
+                                <th>วันที่</th>
+                                <th>เวลา</th>
+                                <th>กิจกรรม</th>
+                                <th>สถานที่</th>
+                                <th class="w-24">จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="schedule-table-body">
+                            <tr><td colspan="6" class="text-center py-8">กำลังโหลดข้อมูล...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Panel: Submissions -->
+            <section id="panel-submissions" class="admin-section hidden">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                    <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2 font-heading"><i class='bx bx-upload text-primary'></i> ผลงานที่ส่งประกวด</h2>
+                    <div class="flex gap-2 w-full sm:w-auto">
+                        <select id="sub-comp-filter" class="form-control !mb-0 min-w-[200px] shadow-sm">
+                            <option value="">-- เลือกรายการแข่งขัน --</option>
+                        </select>
+                        <button class="btn btn-outline bg-white flex-shrink-0 shadow-sm" id="btn-refresh-sub"><i class='bx bx-refresh'></i></button>
+                    </div>
+                </div>
+                
+                <div class="overflow-x-auto rounded-lg shadow-sm border border-slate-200 bg-white">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>รหัสสมัคร</th>
+                                <th>ชื่อผลงาน</th>
+                                <th>ลิงก์/ไฟล์แนบ</th>
+                                <th>วันที่ส่ง</th>
+                                <th class="w-24">จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sub-table-body">
+                            <tr><td colspan="5" class="text-center py-8">กรุณาเลือกรายการแข่งขันเพื่อดูผลงาน</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Panel: Settings -->
+            <section id="panel-settings" class="admin-section hidden">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                    <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2 font-heading"><i class='bx bx-cog text-primary'></i> การตั้งค่าเว็บ</h2>
+                </div>
+                
+                <div class="overflow-x-auto rounded-lg shadow-sm border border-slate-200 bg-white">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>ตั้งค่า (Key)</th>
+                                <th>ค่าที่ตั้งไว้ (Value)</th>
+                                <th class="w-24">จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="setting-table-body">
+                            <tr><td colspan="3" class="text-center py-8">กำลังโหลดข้อมูล...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- MODALS -->
+
+    <!-- Modal: Announcement -->
+    <div id="modal-ann" class="modal-overlay">
+        <div class="modal-content">
+            <div class="flex justify-between items-center px-6 py-4 border-b border-slate-200 bg-slate-50">
+                <h2 class="text-lg font-bold text-slate-800" id="ann-modal-title">เขียนข่าวประกาศ</h2>
+                <button class="close-modal text-slate-400 hover:text-slate-600 text-2xl leading-none">&times;</button>
+            </div>
+            <form id="form-ann" class="flex flex-col flex-grow overflow-hidden">
+                <div class="p-6 overflow-y-auto bg-white">
+                    <input type="hidden" id="ann-id">
+                    <input type="hidden" id="ann-mode" value="add">
+                    <div class="form-group">
+                        <label>หัวข้อข่าว</label>
+                        <input type="text" id="ann-title" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>เนื้อหา</label>
+                        <textarea id="ann-content" class="form-control h-32 resize-none" required></textarea>
+                    </div>
+                    <div class="form-group mb-0">
+                        <label>สถานะ</label>
+                        <select id="ann-status" class="form-control">
+                            <option value="true">แสดงผล</option>
+                            <option value="false">ซ่อน</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="p-4 border-t border-slate-200 bg-slate-50 flex justify-end gap-3">
+                    <button type="button" class="btn btn-outline bg-white close-modal">ยกเลิก</button>
+                    <button type="submit" class="btn btn-primary" id="btn-submit-ann">บันทึกข้อมูล</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Competition -->
+    <div id="modal-comp" class="modal-overlay">
+        <div class="modal-content !max-w-2xl">
+            <div class="flex justify-between items-center px-6 py-4 border-b border-slate-200 bg-slate-50">
+                <h2 class="text-lg font-bold text-slate-800" id="comp-modal-title">เพิ่ม/แก้ไขรายการแข่งขัน</h2>
+                <button class="close-modal text-slate-400 hover:text-slate-600 text-2xl leading-none">&times;</button>
+            </div>
+            <form id="form-comp" class="flex flex-col flex-grow overflow-hidden">
+                <div class="p-6 overflow-y-auto bg-white">
+                    <input type="hidden" id="comp-mode" value="add">
+                    <input type="hidden" id="comp-old-id">
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="form-group">
+                            <label>รหัส (เช่น C005)</label>
+                            <input type="text" id="comp-id" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label>ชื่อการแข่งขัน</label>
+                            <input type="text" id="comp-title" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label>หมวดหมู่</label>
+                            <select id="comp-cat" class="form-control" required>
+                                <option value="วิชาการ">วิชาการ</option>
+                                <option value="โครงงาน">โครงงาน</option>
+                                <option value="สื่อสร้างสรรค์">สื่อสร้างสรรค์</option>
+                                <option value="อื่นๆ">อื่นๆ</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>ระดับชั้น</label>
+                            <input type="text" id="comp-level" class="form-control" placeholder="เช่น ม.1-ม.6" required>
+                        </div>
+                        <div class="form-group">
+                            <label>รูปแบบ</label>
+                            <select id="comp-type-select" class="form-control" required>
+                                <option value="team">ประเภททีม</option>
+                                <option value="single">ประเภทเดี่ยว</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>สมาชิกขั้นต่ำ</label>
+                            <input type="number" id="comp-tmin" class="form-control" value="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label>สมาชิกสูงสุด</label>
+                            <input type="number" id="comp-tmax" class="form-control" value="3" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>คำอธิบายย่อ</label>
+                        <input type="text" id="comp-desc" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>กติกา (Rules)</label>
+                        <textarea id="comp-rules" class="form-control h-20"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>เกณฑ์ตัดสิน (Judging Criteria)</label>
+                        <textarea id="comp-criteria" class="form-control h-20"></textarea>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-0">
+                        <div class="form-group mb-0">
+                            <label>สถานที่จัดแข่ง</label>
+                            <input type="text" id="comp-location" class="form-control">
+                        </div>
+                        <div class="form-group mb-0">
+                            <label>วันที่และเวลาแข่ง</label>
+                            <input type="datetime-local" id="comp-date" class="form-control">
+                        </div>
+                    </div>
+                </div>
+                <div class="p-4 border-t border-slate-200 bg-slate-50 flex justify-end gap-3">
+                    <button type="button" class="btn btn-outline bg-white close-modal">ยกเลิก</button>
+                    <button type="submit" class="btn btn-primary" id="btn-submit-comp">บันทึกข้อมูล</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: View Details -->
+    <div id="modal-view-details" class="modal-overlay">
+        <div class="modal-content">
+            <div class="flex justify-between items-center px-6 py-4 border-b border-slate-200 bg-slate-50">
+                <h2 class="text-lg font-bold text-slate-800">รายละเอียด</h2>
+                <button class="close-modal text-slate-400 hover:text-slate-600 text-2xl leading-none">&times;</button>
+            </div>
+            <div id="view-details-content" class="p-6 overflow-y-auto prose prose-sm prose-slate max-w-none bg-white">
+                <!-- Content injected via JS -->
+            </div>
+            <div class="p-4 border-t border-slate-200 bg-slate-50 flex justify-end">
+                <button type="button" class="btn btn-primary close-modal">ปิดหน้าต่าง</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Schedule -->
+    <div id="modal-schedule" class="modal-overlay">
+        <div class="modal-content">
+            <div class="flex justify-between items-center px-6 py-4 border-b border-slate-200 bg-slate-50">
+                <h2 class="text-lg font-bold text-slate-800" id="schedule-modal-title">เพิ่ม/แก้ไขกำหนดการ</h2>
+                <button class="close-modal text-slate-400 hover:text-slate-600 text-2xl leading-none">&times;</button>
+            </div>
+            <form id="form-schedule" class="flex flex-col flex-grow overflow-hidden">
+                <div class="p-6 overflow-y-auto bg-white">
+                    <input type="hidden" id="schedule-mode" value="add">
+                    <input type="hidden" id="schedule-id">
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="form-group">
+                            <label>วันที่</label>
+                            <input type="date" id="schedule-date" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label>สถานที่</label>
+                            <input type="text" id="schedule-location" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label>เวลาเริ่ม</label>
+                            <input type="time" id="schedule-start" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label>เวลาสิ้นสุด</label>
+                            <input type="time" id="schedule-end" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>ชื่อกิจกรรม</label>
+                        <input type="text" id="schedule-title" class="form-control" required>
+                    </div>
+                    <div class="form-group mb-0">
+                        <label>รายละเอียดเพิ่มเติม</label>
+                        <textarea id="schedule-desc" class="form-control h-20 resize-none"></textarea>
+                    </div>
+                </div>
+                <div class="p-4 border-t border-slate-200 bg-slate-50 flex justify-end gap-3">
+                    <button type="button" class="btn btn-outline bg-white close-modal">ยกเลิก</button>
+                    <button type="submit" class="btn btn-primary" id="btn-submit-schedule">บันทึกข้อมูล</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Settings -->
+    <div id="modal-settings" class="modal-overlay">
+        <div class="modal-content">
+            <div class="flex justify-between items-center px-6 py-4 border-b border-slate-200 bg-slate-50">
+                <h2 class="text-lg font-bold text-slate-800">แก้ไขการตั้งค่า</h2>
+                <button class="close-modal text-slate-400 hover:text-slate-600 text-2xl leading-none">&times;</button>
+            </div>
+            <form id="form-settings" class="flex flex-col flex-grow overflow-hidden">
+                <div class="p-6 overflow-y-auto bg-white">
+                    <input type="hidden" id="setting-key">
+                    <div class="form-group">
+                        <label>Key</label>
+                        <input type="text" id="setting-key-display" class="form-control bg-slate-100" readonly>
+                    </div>
+                    <div class="form-group mb-0">
+                        <label>Value</label>
+                        <input type="text" id="setting-value" class="form-control" required>
+                    </div>
+                </div>
+                <div class="p-4 border-t border-slate-200 bg-slate-50 flex justify-end gap-3">
+                    <button type="button" class="btn btn-outline bg-white close-modal">ยกเลิก</button>
+                    <button type="submit" class="btn btn-primary" id="btn-submit-settings">บันทึกข้อมูล</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Submission -->
+    <div id="modal-submission" class="modal-overlay">
+        <div class="modal-content">
+            <div class="flex justify-between items-center px-6 py-4 border-b border-slate-200 bg-slate-50">
+                <h2 class="text-lg font-bold text-slate-800">จัดการข้อมูลส่งผลงาน</h2>
+                <button class="close-modal text-slate-400 hover:text-slate-600 text-2xl leading-none">&times;</button>
+            </div>
+            <form id="form-submission" class="flex flex-col flex-grow overflow-hidden">
+                <div class="p-6 overflow-y-auto bg-white">
+                    <input type="hidden" id="sub-id">
+                    
+                    <div class="form-group">
+                        <label>รหัสสมัครอ้างอิง</label>
+                        <input type="text" id="sub-reg-code" class="form-control bg-slate-100" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>ชื่อผลงาน</label>
+                        <input type="text" id="sub-title" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>คำอธิบายผลงาน</label>
+                        <textarea id="sub-desc" class="form-control h-20 resize-none"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>ลิงก์ไฟล์ หรือ ลิงก์ภายนอก</label>
+                        <input type="url" id="sub-url" class="form-control">
+                    </div>
+                    <div class="form-group mb-0">
+                        <label>สถานะ</label>
+                        <select id="sub-status" class="form-control">
+                            <option value="ส่งแล้ว">ส่งแล้ว</option>
+                            <option value="รอพิจารณา">รอพิจารณา</option>
+                            <option value="ผ่านเกณฑ์">ผ่านเกณฑ์</option>
+                            <option value="ไม่ผ่านเกณฑ์">ไม่ผ่านเกณฑ์</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="p-4 border-t border-slate-200 bg-slate-50 flex justify-end gap-3">
+                    <button type="button" class="btn btn-outline bg-white close-modal">ยกเลิก</button>
+                    <button type="submit" class="btn btn-primary" id="btn-submit-sub">บันทึกข้อมูล</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Registration -->
+    <div id="modal-registration" class="modal-overlay">
+        <div class="modal-content !max-w-3xl">
+            <div class="flex justify-between items-center px-6 py-4 border-b border-slate-200 bg-slate-50">
+                <h2 class="text-lg font-bold text-slate-800">แก้ไขข้อมูลผู้สมัคร</h2>
+                <button class="close-modal text-slate-400 hover:text-slate-600 text-2xl leading-none">&times;</button>
+            </div>
+            <form id="form-registration" class="flex flex-col flex-grow overflow-hidden">
+                <div class="p-6 overflow-y-auto bg-white max-h-[70vh]">
+                    <input type="hidden" id="reg-code">
+                    <input type="hidden" id="reg-comp-id">
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div class="form-group mb-0">
+                            <label>ชื่อทีม</label>
+                            <input type="text" id="reg-team-name" class="form-control">
+                        </div>
+                        <div class="form-group mb-0">
+                            <label>เบอร์โทรศัพท์ผู้ติดต่อ</label>
+                            <input type="text" id="reg-contact" class="form-control" required maxlength="10">
+                        </div>
+                    </div>
+                    
+                    <!-- Members Container -->
+                    <div class="mt-4 border-t border-slate-200 pt-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="font-bold text-slate-700">รายชื่อสมาชิก</h3>
+                            <button type="button" class="btn btn-outline py-1 px-2 text-xs" id="btn-add-member"><i class='bx bx-plus'></i> เพิ่มสมาชิก</button>
+                        </div>
+                        <div id="reg-members-container" class="space-y-3">
+                            <!-- Injected by JS -->
+                        </div>
+                    </div>
+                </div>
+                <div class="p-4 border-t border-slate-200 bg-slate-50 flex justify-end gap-3">
+                    <button type="button" class="btn btn-outline bg-white close-modal">ยกเลิก</button>
+                    <button type="submit" class="btn btn-primary" id="btn-submit-reg">บันทึกข้อมูล</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/api.js"></script>
+    <script src="assets/js/admin.js"></script>
+</body>
+</html>

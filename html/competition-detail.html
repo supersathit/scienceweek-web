@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>รายละเอียดการแข่งขัน - สัปดาห์วิทยาศาสตร์</title>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="assets/js/tailwind-config.js"></script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .glass-panel {
+                @apply bg-white/70 backdrop-blur-lg border border-white/40 shadow-xl;
+            }
+            .text-gradient {
+                @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary;
+            }
+            .btn {
+                @apply inline-flex items-center justify-center px-6 py-2.5 rounded-full font-medium transition-all duration-300;
+            }
+            .btn-primary {
+                @apply bg-gradient-to-r from-primary to-secondary text-white hover:shadow-lg hover:-translate-y-1;
+            }
+            .btn-secondary {
+                @apply bg-secondary text-white hover:bg-secondaryHover hover:shadow-lg hover:-translate-y-1;
+            }
+            .btn-outline {
+                @apply border-2 border-primary text-primary hover:bg-primary hover:text-white;
+            }
+            .markdown-content p { @apply mb-4 text-slate-600 leading-relaxed; }
+            .markdown-content ul { @apply list-disc list-inside mb-4 text-slate-600 space-y-2; }
+            .markdown-content ol { @apply list-decimal list-inside mb-4 text-slate-600 space-y-2; }
+            .markdown-content strong { @apply font-semibold text-slate-800; }
+        }
+    </style>
+</head>
+<body class="font-sans text-dark min-h-screen flex flex-col relative overflow-x-hidden">
+    <!-- Navbar -->
+    <header class="fixed top-0 w-full z-50 glass-panel border-b-0 border-x-0 border-t-0 rounded-none transition-all duration-300 py-3">
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
+            <a href="index.html" class="flex items-center gap-2 text-2xl font-heading font-bold text-gradient">
+                <i class='bx bx-atom text-primary'></i>
+                <span>ScienceWeek</span>
+            </a>
+            
+            <ul class="hidden md:flex space-x-8 text-sm font-medium">
+                <li><a href="index.html" class="text-slate-600 hover:text-primary transition-colors">หน้าแรก</a></li>
+                <li><a href="schedule.html" class="text-slate-600 hover:text-primary transition-colors">กำหนดการ</a></li>
+                <li><a href="competitions.html" class="text-primary font-semibold">รายการแข่งขัน</a></li>
+            </ul>
+            
+            <div class="hidden md:flex items-center space-x-2">
+                <a href="register.html" class="btn btn-outline text-sm px-5 py-2">สมัครแข่งขัน</a>
+                <a href="admin.html" class="text-slate-400 hover:text-primary transition-colors text-xl p-2" title="Admin Dashboard"><i class='bx bx-cog'></i></a>
+            </div>
+            
+            <button class="md:hidden text-2xl text-slate-700 focus:outline-none"><i class='bx bx-menu'></i></button>
+        </nav>
+    </header>
+
+    <main class="flex-grow pt-24 pb-16">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-6">
+            <a href="competitions.html" class="inline-flex items-center text-slate-500 hover:text-primary transition-colors font-medium">
+                <i class='bx bx-arrow-back mr-2'></i> กลับไปหน้ารายการแข่งขัน
+            </a>
+        </div>
+
+        <section class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div id="detail-loading" class="flex flex-col items-center justify-center py-20 text-slate-500 glass-panel rounded-2xl">
+                <i class='bx bx-loader-alt bx-spin text-4xl mb-4 text-primary'></i>
+                <p>กำลังโหลดข้อมูลการแข่งขัน...</p>
+            </div>
+            
+            <div id="detail-error" class="hidden flex flex-col items-center justify-center py-20 text-red-500 glass-panel rounded-2xl">
+                <i class='bx bx-error-circle text-4xl mb-4'></i>
+                <p>ไม่พบข้อมูลการแข่งขันที่ระบุ</p>
+            </div>
+            
+            <div id="detail-content" class="hidden">
+                <!-- Header -->
+                <div class="glass-panel p-6 md:p-10 rounded-t-3xl border-b-0 relative overflow-hidden">
+                    <!-- Decorative orb inside header -->
+                    <div class="absolute -top-10 -right-10 w-40 h-40 bg-accent rounded-full filter blur-3xl opacity-50 pointer-events-none"></div>
+                    
+                    <div class="flex flex-wrap items-center gap-3 mb-6 relative z-10">
+                        <span id="c-category" class="px-3 py-1 rounded-full bg-accent text-primary text-sm font-semibold uppercase tracking-wide border border-pink-100">หมวดหมู่</span>
+                        <span id="c-status" class="px-3 py-1 rounded-full bg-slate-100 text-slate-600 text-sm font-semibold border border-slate-200">รับสมัคร</span>
+                    </div>
+                    
+                    <h1 id="c-title" class="text-3xl md:text-5xl font-heading font-bold mb-4 text-slate-800 leading-tight relative z-10">ชื่อการแข่งขัน</h1>
+                    <p id="c-desc" class="text-lg text-slate-600 mb-8 max-w-3xl relative z-10">คำอธิบายการแข่งขันเบื้องต้น</p>
+                    
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 bg-white/60 p-6 rounded-2xl border border-white/60 relative z-10 shadow-sm">
+                        <div class="flex items-start gap-3">
+                            <i class='bx bx-group text-2xl text-primary mt-1'></i>
+                            <div>
+                                <span class="block text-[11px] text-slate-500 uppercase tracking-widest font-bold mb-1">ระดับชั้น</span>
+                                <strong id="c-level" class="text-slate-800 text-sm md:text-base">ม.1 - ม.3</strong>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <i class='bx bx-user text-2xl text-secondary mt-1'></i>
+                            <div>
+                                <span class="block text-[11px] text-slate-500 uppercase tracking-widest font-bold mb-1">สมาชิก</span>
+                                <strong id="c-team" class="text-slate-800 text-sm md:text-base">1-3 คน/ทีม</strong>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <i class='bx bx-calendar text-2xl text-primary mt-1'></i>
+                            <div>
+                                <span class="block text-[11px] text-slate-500 uppercase tracking-widest font-bold mb-1">วันแข่งขัน</span>
+                                <strong id="c-date" class="text-slate-800 text-sm md:text-base">18 ส.ค. 2569</strong>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <i class='bx bx-map text-2xl text-secondary mt-1'></i>
+                            <div>
+                                <span class="block text-[11px] text-slate-500 uppercase tracking-widest font-bold mb-1">สถานที่</span>
+                                <strong id="c-location" class="text-slate-800 text-sm md:text-base">อาคาร 1</strong>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-8 flex flex-wrap gap-4 relative z-10">
+                        <a href="#" class="btn btn-primary shadow-primary/30" id="btn-register" style="display:none;"><i class='bx bx-edit mr-2'></i> สมัครแข่งขัน</a>
+                        <a href="#" class="btn btn-secondary shadow-secondary/30" id="btn-submit" style="display:none;"><i class='bx bx-upload mr-2'></i> ส่งผลงานออนไลน์</a>
+                    </div>
+                </div>
+
+                <!-- Body Sections -->
+                <div class="bg-white rounded-b-3xl shadow-xl border border-t-0 border-slate-100 overflow-hidden relative">
+                    <div class="p-6 md:p-10 border-b border-slate-100">
+                        <h2 class="text-2xl font-bold font-heading mb-6 flex items-center gap-3 text-slate-800">
+                            <div class="w-10 h-10 rounded-full bg-accent flex items-center justify-center text-primary"><i class='bx bx-list-check'></i></div>
+                            กติกาการแข่งขัน
+                        </h2>
+                        <div id="c-rules" class="markdown-content pl-2 md:pl-12">
+                            <!-- content -->
+                        </div>
+                    </div>
+
+                    <div class="p-6 md:p-10">
+                        <h2 class="text-2xl font-bold font-heading mb-6 flex items-center gap-3 text-slate-800">
+                            <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-secondary"><i class='bx bx-check-shield'></i></div>
+                            เกณฑ์การตัดสิน
+                        </h2>
+                        <div id="c-criteria" class="markdown-content pl-2 md:pl-12">
+                            <!-- content -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-slate-300 py-10 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="text-center md:text-left">
+                <h3 class="text-white font-heading font-bold text-xl mb-2 flex items-center justify-center md:justify-start gap-2">
+                    <i class='bx bx-atom text-primary'></i> ScienceWeek
+                </h3>
+                <p class="text-sm">กลุ่มสาระการเรียนรู้วิทยาศาสตร์และเทคโนโลยี<br>โรงเรียนวัชรวิทยา</p>
+            </div>
+            <div class="text-center md:text-right text-sm">
+                <p>&copy; 2026 ScienceWeek Vacharawittaya. All rights reserved.</p>
+                <div class="mt-4 flex gap-4 justify-center md:justify-end text-xl">
+                    <a href="#" class="hover:text-primary transition-colors"><i class='bx bxl-facebook-circle'></i></a>
+                    <a href="#" class="hover:text-secondary transition-colors"><i class='bx bx-globe'></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/api.js"></script>
+    <script src="assets/js/competition-detail.js"></script>
+</body>
+</html>

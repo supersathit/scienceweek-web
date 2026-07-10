@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>สมัครการแข่งขัน - สัปดาห์วิทยาศาสตร์ โรงเรียนวัชรวิทยา</title>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="assets/js/tailwind-config.js"></script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .glass-panel {
+                @apply bg-white/70 backdrop-blur-lg border border-white/40 shadow-xl;
+            }
+            .text-gradient {
+                @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary;
+            }
+            .btn {
+                @apply inline-flex items-center justify-center px-6 py-2.5 rounded-full font-medium transition-all duration-300;
+            }
+            .btn-primary {
+                @apply bg-gradient-to-r from-primary to-secondary text-white hover:shadow-lg hover:-translate-y-1;
+            }
+            .btn-outline {
+                @apply border-2 border-primary text-primary hover:bg-primary hover:text-white;
+            }
+            .form-control {
+                @apply w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-slate-700 bg-white/50 focus:bg-white;
+            }
+            .form-label {
+                @apply block text-sm font-semibold tracking-wide text-slate-700 mb-2;
+            }
+            .member-card {
+                @apply bg-white p-5 rounded-xl border border-slate-100 shadow-sm relative overflow-hidden;
+            }
+            .member-number {
+                @apply absolute -top-3 -right-3 w-12 h-12 bg-slate-50 text-slate-300 rounded-full flex items-end justify-start p-3 text-2xl font-bold italic;
+            }
+        }
+    </style>
+</head>
+<body class="font-sans text-dark min-h-screen flex flex-col relative overflow-x-hidden bg-slate-50">
+    <!-- Background Decoration -->
+    <div class="fixed top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
+        <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-primary/10 blur-[100px]"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-secondary/10 blur-[100px]"></div>
+    </div>
+
+    <!-- Navbar -->
+    <header class="fixed top-0 w-full z-50 glass-panel border-b-0 border-x-0 border-t-0 rounded-none transition-all duration-300 py-3">
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
+            <a href="index.html" class="flex items-center gap-2 text-2xl font-heading font-bold text-gradient">
+                <i class='bx bx-atom text-primary'></i>
+                <span>ScienceWeek</span>
+            </a>
+            
+            <ul class="hidden md:flex space-x-8 text-sm font-medium">
+                <li><a href="index.html" class="text-slate-600 hover:text-primary transition-colors">หน้าแรก</a></li>
+                <li><a href="schedule.html" class="text-slate-600 hover:text-primary transition-colors">กำหนดการ</a></li>
+                <li><a href="competitions.html" class="text-slate-600 hover:text-primary transition-colors">รายการแข่งขัน</a></li>
+                <li><a href="register.html" class="text-primary font-semibold">สมัครแข่งขัน</a></li>
+                <li><a href="submit.html" class="text-slate-600 hover:text-primary transition-colors">ส่งผลงาน</a></li>
+            </ul>
+            
+            <div class="hidden md:flex items-center space-x-2">
+                <a href="register.html" class="btn btn-primary text-sm px-5 py-2">สมัครแข่งขัน</a>
+                <a href="admin.html" class="text-slate-400 hover:text-primary transition-colors text-xl p-2" title="Admin Dashboard"><i class='bx bx-cog'></i></a>
+            </div>
+            
+            <button class="md:hidden text-2xl text-slate-700 focus:outline-none"><i class='bx bx-menu'></i></button>
+        </nav>
+    </header>
+
+    <main class="flex-grow pt-24 pb-16">
+        <section class="max-w-4xl mx-auto px-4 sm:px-6 pt-8">
+            <div class="text-center mb-10">
+                <span class="inline-block py-1 px-4 rounded-full bg-accent text-primary text-sm font-medium mb-4 shadow-sm">Registration</span>
+                <h1 class="text-3xl sm:text-4xl font-heading font-bold mb-4 text-slate-800">สมัครเข้าร่วมการแข่งขัน</h1>
+                <p class="text-slate-600">กรุณากรอกข้อมูลให้ครบถ้วนและตรวจสอบความถูกต้องก่อนบันทึกข้อมูล</p>
+            </div>
+
+            <div id="loading-state" class="flex flex-col items-center justify-center py-20 text-slate-500">
+                <i class='bx bx-loader-alt bx-spin text-4xl mb-4 text-primary'></i>
+                <p>กำลังเตรียมแบบฟอร์มรับสมัคร...</p>
+            </div>
+
+            <div id="error-state" class="hidden flex flex-col items-center justify-center py-20 text-red-500">
+                <i class='bx bx-error-circle text-5xl mb-4'></i>
+                <p class="text-lg">เกิดข้อผิดพลาดในการโหลดข้อมูล</p>
+                <button onclick="window.location.reload()" class="btn btn-outline mt-4">ลองใหม่อีกครั้ง</button>
+            </div>
+
+            <div id="form-container" class="hidden glass-panel rounded-2xl p-6 sm:p-10">
+                <form id="registration-form">
+                    
+                    <!-- ส่วนที่ 1: เลือกรายการแข่งขัน -->
+                    <div class="mb-8 pb-8 border-b border-slate-100">
+                        <h2 class="text-xl font-bold font-heading mb-6 flex items-center gap-3 text-slate-800">
+                            <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary"><i class='bx bx-trophy'></i></div>
+                            1. เลือกรายการแข่งขัน
+                        </h2>
+                        
+                        <div>
+                            <label class="form-label">รายการแข่งขันที่ต้องการสมัคร <span class="text-red-500">*</span></label>
+                            <select id="comp-select" class="form-control" required>
+                                <option value="">-- กำลังโหลดรายการแข่งขัน --</option>
+                            </select>
+                            <p class="text-xs font-semibold text-primary mt-3 p-3 bg-accent rounded-lg hidden" id="comp-info-text"></p>
+                        </div>
+                    </div>
+
+                    <!-- ส่วนที่ 2: ข้อมูลทีม -->
+                    <div class="mb-8 pb-8 border-b border-slate-100" id="contact-section">
+                        <h2 class="text-xl font-bold font-heading mb-6 flex items-center gap-3 text-slate-800">
+                            <div class="w-8 h-8 rounded-full bg-secondary/10 flex items-center justify-center text-secondary"><i class='bx bx-info-circle'></i></div>
+                            2. ข้อมูลติดต่อ
+                        </h2>
+                        
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <div id="team-name-group">
+                                <label class="form-label">ชื่อทีม <span class="text-red-500">*</span></label>
+                                <input type="text" id="team-name" class="form-control" placeholder="ตั้งชื่อทีมของคุณ">
+                            </div>
+                            <div>
+                                <label class="form-label">เบอร์โทรศัพท์ติดต่อ <span class="text-red-500">*</span></label>
+                                <input type="text" id="contact-phone" class="form-control" required placeholder="08X-XXX-XXXX" maxlength="10">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ส่วนที่ 3: สมาชิก -->
+                    <div class="mb-8">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-xl font-bold font-heading flex items-center gap-3 text-slate-800">
+                                <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600"><i class='bx bx-group'></i></div>
+                                3. ข้อมูลผู้เข้าแข่งขัน
+                            </h2>
+                            <span id="member-count-badge" class="text-sm font-semibold bg-slate-100 px-3 py-1 rounded-full text-slate-600">0 / 0 คน</span>
+                        </div>
+                        
+                        <div id="members-container" class="space-y-4">
+                            <!-- Injected by JS -->
+                        </div>
+                        
+                        <div class="mt-6 text-center">
+                            <button type="button" id="btn-add-member" class="btn btn-outline border-dashed bg-transparent w-full sm:w-auto hidden">
+                                <i class='bx bx-plus'></i> เพิ่มสมาชิก
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="pt-6 border-t border-slate-200 mt-8">
+                        <button type="submit" id="btn-submit" class="btn btn-primary w-full text-lg py-4 shadow-lg shadow-primary/20">
+                            <i class='bx bx-send'></i> ยืนยันการสมัครแข่งขัน
+                        </button>
+                        <p class="text-center text-xs text-slate-500 mt-4">เมื่อกดปุ่มยืนยันการสมัคร ถือว่าคุณยอมรับกติกาและเงื่อนไขการแข่งขันแล้ว</p>
+                    </div>
+
+                </form>
+            </div>
+            
+            <!-- Success Screen -->
+            <div id="success-state" class="hidden glass-panel rounded-2xl p-10 text-center">
+                <div class="w-20 h-20 rounded-full bg-green-100 text-green-500 flex items-center justify-center text-5xl mx-auto mb-6">
+                    <i class='bx bx-check'></i>
+                </div>
+                <h2 class="text-3xl font-bold font-heading mb-4 text-slate-800">สมัครแข่งขันสำเร็จ!</h2>
+                <p class="text-slate-600 mb-4 max-w-md mx-auto">ระบบได้รับข้อมูลการสมัครของคุณเรียบร้อยแล้ว รหัสการสมัครของคุณคือ <strong id="success-reg-code" class="text-primary text-xl block mt-2 mb-4"></strong></p>
+                <div class="bg-red-50 text-red-600 p-4 rounded-xl mb-8 max-w-md mx-auto text-sm border border-red-100 text-left">
+                    <p class="font-bold flex items-center gap-1 mb-1"><i class='bx bx-error-circle'></i> โปรดบันทึกรหัสการสมัคร!</p>
+                    <p>กรุณาจดบันทึกหรือแคปหน้าจอรหัสนี้ไว้ คุณจะต้องใช้รหัสนี้เพื่อยืนยันตัวตนใน <b>หน้าส่งผลงานออนไลน์</b></p>
+                </div>
+                <div class="flex flex-col sm:flex-row justify-center gap-4">
+                    <a href="competitions.html" class="btn btn-outline">กลับไปหน้ารายการแข่งขัน</a>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-slate-300 py-10 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="text-center md:text-left">
+                <h3 class="text-white font-heading font-bold text-xl mb-2 flex items-center justify-center md:justify-start gap-2">
+                    <i class='bx bx-atom text-primary'></i> ScienceWeek
+                </h3>
+                <p class="text-sm">กลุ่มสาระการเรียนรู้วิทยาศาสตร์และเทคโนโลยี<br>โรงเรียนวัชรวิทยา</p>
+            </div>
+            <div class="text-center md:text-right text-sm">
+                <p>&copy; 2026 ScienceWeek Vacharawittaya. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/api.js"></script>
+    <script src="assets/js/register.js"></script>
+</body>
+</html>
