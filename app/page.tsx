@@ -50,14 +50,14 @@ export default function Home() {
 
   return (
     <>
-      <section className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24 flex flex-col lg:flex-row items-center">
+      <section className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 lg:py-24 flex flex-col lg:flex-row items-center">
           <div className="lg:w-1/2 z-10 text-center lg:text-left">
               <span className="inline-block py-1 px-4 rounded-full bg-accent text-primary text-sm font-medium mb-4 shadow-sm">ปีการศึกษา 2569</span>
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-heading font-bold leading-tight mb-6">
+              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-heading font-bold leading-tight mb-4 sm:mb-6">
                   สัปดาห์วิทยาศาสตร์<br/>
                   <span className="text-gradient">โรงเรียนวัชรวิทยา</span>
               </h1>
-              <p className="text-slate-600 text-lg mb-8 max-w-2xl mx-auto lg:mx-0">
+              <p className="text-slate-600 text-base sm:text-lg mb-8 max-w-2xl mx-auto lg:mx-0">
                   เปิดประตูสู่โลกแห่งนวัตกรรมและการค้นพบ ร่วมสนุกกับกิจกรรมและการแข่งขันทางวิทยาศาสตร์มากมาย พร้อมชิงรางวัลสุดพิเศษ
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
@@ -71,21 +71,22 @@ export default function Home() {
               <div className="orb orb-2"></div>
               
               {/* Floating Glass Cards */}
-              <div className="relative w-full max-w-md h-[400px]">
-                  <div className="glass-panel floating absolute top-10 right-0 p-6 rounded-2xl w-64">
-                      <div className="w-12 h-12 rounded-full bg-pink-100 text-primary flex items-center justify-center text-2xl mb-4">
+              {/* Floating Glass Cards */}
+              <div className="relative w-full max-w-md h-[300px] sm:h-[400px]">
+                  <div className="glass-panel floating absolute top-2 sm:top-10 right-0 sm:right-4 md:right-0 p-4 sm:p-6 rounded-2xl w-[60%] sm:w-64 z-10">
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-pink-100 text-primary flex items-center justify-center text-xl sm:text-2xl mb-3 sm:mb-4">
                           <i className='bx bx-trophy'></i>
                       </div>
-                      <h3 className="font-bold text-xl mb-1"><span>{stats.comps || '10+'}</span> รายการ</h3>
-                      <p className="text-slate-500 text-sm">รายการแข่งขันสุดท้าทาย</p>
+                      <h3 className="font-bold text-base sm:text-xl mb-1"><span>{stats.comps || '10+'}</span> รายการ</h3>
+                      <p className="text-slate-500 text-xs sm:text-sm">รายการแข่งขันสุดท้าทาย</p>
                   </div>
                   
-                  <div className="glass-panel floating floating-delay absolute bottom-10 left-0 p-6 rounded-2xl w-64">
-                      <div className="w-12 h-12 rounded-full bg-blue-100 text-secondary flex items-center justify-center text-2xl mb-4">
+                  <div className="glass-panel floating floating-delay absolute bottom-2 sm:bottom-10 left-0 sm:left-4 md:left-0 p-4 sm:p-6 rounded-2xl w-[60%] sm:w-64">
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-blue-100 text-secondary flex items-center justify-center text-xl sm:text-2xl mb-3 sm:mb-4">
                           <i className='bx bx-brain'></i>
                       </div>
-                      <h3 className="font-bold text-xl mb-1"><span>{stats.categories || '3'}</span> หมวดหมู่</h3>
-                      <p className="text-slate-500 text-sm">{stats.catNames || 'วิชาการ โครงงาน นวัตกรรม'}</p>
+                      <h3 className="font-bold text-base sm:text-xl mb-1"><span>{stats.categories || '3'}</span> หมวดหมู่</h3>
+                      <p className="text-slate-500 text-xs sm:text-sm">{stats.catNames || 'วิชาการ โครงงาน นวัตกรรม'}</p>
                   </div>
               </div>
           </div>

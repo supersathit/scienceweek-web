@@ -34,10 +34,12 @@ export default function RootLayout({
       <head>
         <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet' />
       </head>
-      <body className="min-h-full flex flex-col font-sans text-dark overflow-x-hidden">
-        <ClientLayout>
-          {children}
-        </ClientLayout>
+      <body className="min-h-full flex flex-col font-sans text-dark overflow-x-hidden bg-[#f8fafc]">
+        <div className="flex flex-col min-h-screen overflow-x-hidden w-full max-w-[100vw] relative">
+          <ClientLayout>
+            {children}
+          </ClientLayout>
+        </div>
       </body>
     </html>
   );

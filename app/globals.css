@@ -45,9 +45,13 @@
   }
 }
 
-body {
+html, body {
     margin: 0;
     padding: 0;
+    overflow-x: hidden;
+}
+
+body {
     background-color: #f8fafc;
     background-image: 
         radial-gradient(at 10% 20%, rgba(219, 39, 119, 0.15) 0px, transparent 50%),

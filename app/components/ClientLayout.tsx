@@ -2,11 +2,12 @@
 
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import React from 'react';
+import React, { useState } from 'react';
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isAdmin = pathname.startsWith('/admin');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
     <>
@@ -31,8 +32,34 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                   <Link href="/admin" className="text-slate-400 hover:text-primary transition-colors text-xl p-2" title="Admin Dashboard"><i className='bx bx-cog'></i></Link>
               </div>
               
-              <button className="md:hidden text-2xl text-slate-700 focus:outline-none"><i className='bx bx-menu'></i></button>
+              <button 
+                className="md:hidden text-2xl text-slate-700 focus:outline-none transition-transform duration-300 hover:scale-110"
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                aria-label="Toggle menu"
+              >
+                <i className={isMobileMenuOpen ? 'bx bx-x' : 'bx bx-menu'}></i>
+              </button>
           </nav>
+
+          {/* Mobile Menu */}
+          <div 
+            className={`md:hidden absolute top-[100%] left-0 w-full bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-xl overflow-hidden transition-all duration-300 ease-in-out ${
+              isMobileMenuOpen ? "max-h-[500px] opacity-100 py-4" : "max-h-0 opacity-0 py-0"
+            }`}
+          >
+            <div className="flex flex-col px-6 space-y-4">
+              <Link href="/" className="text-slate-700 hover:text-primary font-medium transition-colors" onClick={() => setIsMobileMenuOpen(false)}>หน้าแรก</Link>
+              <Link href="/schedule" className="text-slate-700 hover:text-primary font-medium transition-colors" onClick={() => setIsMobileMenuOpen(false)}>กำหนดการ</Link>
+              <Link href="/competitions" className="text-slate-700 hover:text-primary font-medium transition-colors" onClick={() => setIsMobileMenuOpen(false)}>รายการแข่งขัน</Link>
+              <Link href="/submit" className="text-slate-700 hover:text-primary font-medium transition-colors" onClick={() => setIsMobileMenuOpen(false)}>ส่งผลงาน</Link>
+              <div className="h-px bg-slate-200 w-full my-2"></div>
+              <Link href="/check" className="btn bg-slate-100 text-slate-700 hover:bg-slate-200 w-full text-center py-2" onClick={() => setIsMobileMenuOpen(false)}>ตรวจสอบสถานะ</Link>
+              <Link href="/register" className="btn btn-outline w-full text-center py-2" onClick={() => setIsMobileMenuOpen(false)}>สมัครแข่งขัน</Link>
+              <Link href="/admin" className="text-slate-400 hover:text-primary text-center mt-2 flex items-center justify-center gap-2" onClick={() => setIsMobileMenuOpen(false)}>
+                <i className='bx bx-cog text-xl'></i> Admin Dashboard
+              </Link>
+            </div>
+          </div>
         </header>
       )}
 
