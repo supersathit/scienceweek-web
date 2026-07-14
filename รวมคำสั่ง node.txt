@@ -1,0 +1,8 @@
+npx prisma db push
+npx prisma generate
+npm i
+npm run build
+
+
+pm2 start ecosystem.config.js
+pm2 save
