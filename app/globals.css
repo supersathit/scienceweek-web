@@ -20,7 +20,7 @@
       @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary;
   }
   .btn {
-      @apply inline-flex items-center gap-2 justify-center px-6 py-2.5 rounded-full font-medium transition-all duration-300;
+      @apply inline-flex items-center gap-2 justify-center px-6 py-2.5 rounded-full font-medium transition-all duration-300 cursor-pointer;
   }
   .btn-primary {
       @apply bg-gradient-to-r from-primary to-secondary text-white hover:shadow-lg hover:shadow-primary/30 hover:-translate-y-1;
@@ -60,13 +60,60 @@ body {
     color: var(--color-dark);
 }
 
+button, 
+[role="button"] {
+    cursor: pointer;
+}
+
+button:disabled,
+[role="button"]:disabled {
+    cursor: not-allowed;
+}
+
 /* Base custom classes that are too complex for inline tailwind */
 .orb {
     position: absolute;
     border-radius: 50%;
-    filter: blur(60px);
+    filter: blur(80px);
     z-index: -1;
-    opacity: 0.6;
+    animation: float 20s infinite ease-in-out;
+}
+
+/* Markdown/HTML Content Styling */
+.markdown-content p {
+    margin-bottom: 0.75rem;
+}
+.markdown-content p:last-child {
+    margin-bottom: 0;
+}
+.markdown-content ul {
+    list-style-type: disc;
+    margin-left: 1.5rem;
+    margin-bottom: 1rem;
+}
+.markdown-content ol {
+    list-style-type: decimal;
+    margin-left: 1.5rem;
+    margin-bottom: 1rem;
+}
+.markdown-content li {
+    margin-bottom: 0.25rem;
+}
+.markdown-content h1, .markdown-content h2, .markdown-content h3 {
+    font-weight: 700;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    color: var(--color-dark);
+}
+.markdown-content h1 { font-size: 1.5em; }
+.markdown-content h2 { font-size: 1.25em; }
+.markdown-content h3 { font-size: 1.1em; }
+.markdown-content a {
+    color: #0ea5e9;
+    text-decoration: underline;
+}
+.markdown-content a:hover {
+    color: #0284c7;
 }
 .orb-1 {
     width: 300px;

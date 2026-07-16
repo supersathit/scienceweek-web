@@ -16,7 +16,9 @@ export async function POST(request: Request) {
       rules, 
       judgingCriteria, 
       location, 
-      competitionDate 
+      competitionDate,
+      registerStartDate,
+      registerEndDate
     } = data;
 
     if (!password || (password !== process.env.ADMIN_PASS && password !== process.env.TEACHER_PASS)) {
@@ -42,6 +44,8 @@ export async function POST(request: Request) {
         judgingCriteria: judgingCriteria || "",
         location: location || "",
         competitionDate: competitionDate ? String(competitionDate) : null,
+        registerStartDate: registerStartDate ? new Date(registerStartDate) : null,
+        registerEndDate: registerEndDate ? new Date(registerEndDate) : null,
         registerOpen: false,
         submissionOpen: false,
       }
@@ -56,7 +60,7 @@ export async function POST(request: Request) {
 export async function PUT(request: Request) {
   try {
     const data = await request.json();
-    const { password, id, title, category, level, teamMin, teamMax, description, rules, judgingCriteria, location, competitionDate } = data;
+    const { password, id, title, category, level, teamMin, teamMax, description, rules, judgingCriteria, location, competitionDate, registerStartDate, registerEndDate } = data;
 
     if (!password || (password !== process.env.ADMIN_PASS && password !== process.env.TEACHER_PASS)) {
       return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
@@ -75,6 +79,8 @@ export async function PUT(request: Request) {
         judgingCriteria: judgingCriteria || "",
         location: location || "",
         competitionDate: competitionDate ? String(competitionDate) : null,
+        registerStartDate: registerStartDate ? new Date(registerStartDate) : null,
+        registerEndDate: registerEndDate ? new Date(registerEndDate) : null,
       }
     });
 

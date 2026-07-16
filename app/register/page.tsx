@@ -4,6 +4,7 @@ import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Swal from 'sweetalert2';
 import Link from 'next/link';
+import { isRegistrationOpen } from '@/lib/competitionUtils';
 
 function RegisterFormContent() {
   const searchParams = useSearchParams();
@@ -26,7 +27,7 @@ function RegisterFormContent() {
       try {
         const res = await fetch('/api/competitions').then(r => r.json());
         if (res.success && res.data) {
-          const available = res.data.filter((c: any) => c.registerOpen === true || String(c.registerOpen).toUpperCase() === 'TRUE');
+          const available = res.data.filter((c: any) => isRegistrationOpen(c));
           setCompetitions(available);
           
           if (available.length === 0) {

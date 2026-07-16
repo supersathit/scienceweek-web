@@ -63,11 +63,6 @@ export default function CheckStatus() {
                         <ul className="space-y-3 text-slate-600">
                             <li><strong className="text-slate-800">การแข่งขัน:</strong> {result.registration.competition?.title}</li>
                             <li><strong className="text-slate-800">ชื่อทีม/ผู้สมัคร:</strong> {result.registration.teamName || result.registration.leaderFullName}</li>
-                            <li><strong className="text-slate-800">สถานะการสมัคร:</strong> 
-                                <span className={`ml-2 px-2 py-1 rounded text-xs font-bold ${result.registration.status === 'approved' ? 'bg-green-100 text-green-700' : result.registration.status === 'submitted' ? 'bg-blue-100 text-blue-700' : result.registration.status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}`}>
-                                    {result.registration.status === 'pending' ? 'รอตรวจสอบ' : result.registration.status === 'approved' ? 'อนุมัติแล้ว' : result.registration.status === 'submitted' ? 'ส่งงานแล้ว' : result.registration.status === 'rejected' ? 'ปฏิเสธ' : result.registration.status.toUpperCase()}
-                                </span>
-                            </li>
                         </ul>
                     </div>
                     

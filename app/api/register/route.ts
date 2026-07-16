@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { isRegistrationOpen } from '@/lib/competitionUtils';
 
 export async function POST(request: Request) {
   try {
@@ -11,7 +12,7 @@ export async function POST(request: Request) {
     if (!comp) {
       return NextResponse.json({ success: false, message: "ไม่พบการแข่งขันนี้" });
     }
-    if (!comp.registerOpen) {
+    if (!isRegistrationOpen(comp)) {
       return NextResponse.json({ success: false, message: "การแข่งขันนี้ปิดรับสมัครแล้ว" });
     }
 

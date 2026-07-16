@@ -2,15 +2,25 @@
 
 import { useEffect, useState } from 'react';
 import Swal from 'sweetalert2';
+import { isRegistrationOpen } from '@/lib/competitionUtils';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
+import * as XLSX from 'xlsx';
 import dayjs from 'dayjs';
 import 'dayjs/locale/th';
 import buddhistEra from 'dayjs/plugin/buddhistEra';
 
 dayjs.extend(buddhistEra);
 dayjs.locale('th');
+
+function renderHTML(content: string | undefined | null) {
+  if (!content) return { __html: '-' };
+  if (/<[a-z][\s\S]*>/i.test(content)) {
+    return { __html: content };
+  }
+  return { __html: content.replace(/\n/g, '<br/>') };
+}
 
 export default function AdminPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -42,7 +52,7 @@ export default function AdminPage() {
     id: '', title: '', category: 'วิชาการ', level: '',
     type: 'team', teamMin: 1, teamMax: 3,
     description: '', rules: '', judgingCriteria: '', location: '',
-    competitionDate: ''
+    competitionDate: '', registerStartDate: '', registerEndDate: ''
   });
 
   // Add/Edit Announcements
@@ -489,7 +499,7 @@ export default function AdminPage() {
                           id: nextId, title: '', category: 'วิชาการ', level: '',
                           type: 'team', teamMin: 1, teamMax: 3,
                           description: '', rules: '', judgingCriteria: '', location: '',
-                          competitionDate: ''
+                          competitionDate: '', registerStartDate: '', registerEndDate: ''
                         });
                         setShowAddModal(true);
                     }} className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-bold shadow-md hover:bg-primary/90 transition-colors whitespace-nowrap">
@@ -517,9 +527,15 @@ export default function AdminPage() {
                                     </td>
                                     <td className="p-4 text-center">
                                         <button 
-                                          onClick={() => toggleCompetitionStatus(c.id, 'register', c.registerOpen)}
-                                          className={`px-3 py-1 rounded-full text-xs font-bold ${c.registerOpen ? 'bg-green-100 text-green-700' : 'bg-slate-200 text-slate-600'}`}>
-                                          {c.registerOpen ? 'เปิด' : 'ปิด'}
+                                          onClick={() => {
+                                              if (c.registerStartDate || c.registerEndDate) {
+                                                  Swal.fire('ตั้งค่าอัตโนมัติ', 'การรับสมัครถูกควบคุมด้วยเวลาที่กำหนดไว้ หากต้องการเปิด/ปิดด้วยตนเอง โปรดลบวันที่รับสมัครออก', 'info');
+                                                  return;
+                                              }
+                                              toggleCompetitionStatus(c.id, 'register', c.registerOpen);
+                                          }}
+                                          className={`px-3 py-1 rounded-full text-xs font-bold ${isRegistrationOpen(c) ? 'bg-green-100 text-green-700' : 'bg-slate-200 text-slate-600'}`}>
+                                          {isRegistrationOpen(c) ? 'เปิด' : 'ปิด'} {(c.registerStartDate || c.registerEndDate) && '(อัตโนมัติ)'}
                                         </button>
                                     </td>
                                     <td className="p-4 text-center">
@@ -565,15 +581,14 @@ export default function AdminPage() {
                                 <th className="p-4 font-semibold">หัวหน้าทีม</th>
                                 <th className="p-4 font-semibold w-48">สมาชิก</th>
                                 <th className="p-4 font-semibold">วันที่สมัคร</th>
-                                <th className="p-4 font-semibold text-center w-32">สถานะ</th>
                                 <th className="p-4 font-semibold text-center w-32">จัดการ</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100 text-sm">
                             {!regCompFilter ? (
-                                <tr><td colSpan={7} className="p-8 text-center text-slate-500">กรุณาเลือกรายการแข่งขัน</td></tr>
+                                <tr><td colSpan={6} className="p-8 text-center text-slate-500">กรุณาเลือกรายการแข่งขัน</td></tr>
                             ) : registrations.length === 0 ? (
-                                <tr><td colSpan={7} className="p-8 text-center text-slate-500">ไม่มีข้อมูลผู้สมัคร</td></tr>
+                                <tr><td colSpan={6} className="p-8 text-center text-slate-500">ไม่มีข้อมูลผู้สมัคร</td></tr>
                             ) : registrations.map(reg => (
                                 <tr key={reg.registrationCode} className="hover:bg-slate-50/50">
                                     <td className="p-4 font-semibold text-slate-700">{reg.registrationCode}</td>
@@ -592,18 +607,6 @@ export default function AdminPage() {
                                         })() : '-'}
                                     </td>
                                     <td className="p-4 text-slate-500 text-xs">{formatThaiDateTime(reg.createdAt)}</td>
-                                    <td className="p-4 text-center">
-                                        <select 
-                                            value={reg.status}
-                                            onChange={(e) => updateRegistrationStatus(reg.registrationCode, e.target.value)}
-                                            className={`px-3 py-1.5 rounded-lg text-xs font-bold focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer ${reg.status === 'pending' ? 'bg-yellow-50 text-yellow-700 border border-yellow-200' : reg.status === 'approved' ? 'bg-green-50 text-green-700 border border-green-200' : reg.status === 'submitted' ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'bg-red-50 text-red-700 border border-red-200'}`}
-                                        >
-                                            <option value="pending" className="text-slate-800 font-medium">รอตรวจสอบ</option>
-                                            <option value="approved" className="text-slate-800 font-medium">อนุมัติแล้ว</option>
-                                            <option value="submitted" className="text-slate-800 font-medium">ส่งงานแล้ว</option>
-                                            <option value="rejected" className="text-slate-800 font-medium">ปฏิเสธ</option>
-                                        </select>
-                                    </td>
                                     <td className="p-4 text-center">
                                         <div className="flex justify-center gap-2">
                                             <button onClick={() => openView(reg, 'registration')} className="text-blue-500 hover:text-blue-700 bg-blue-50 w-8 h-8 rounded-full flex items-center justify-center" title="ดูรายละเอียด"><i className='bx bx-show'></i></button>
@@ -769,14 +772,15 @@ export default function AdminPage() {
       </div>
 
       {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm overflow-y-auto">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl my-8">
-            <div className="p-6 border-b border-slate-100 flex justify-between items-center sticky top-0 bg-white z-10 rounded-t-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-white z-10 rounded-t-2xl shrink-0">
               <h3 className="text-xl font-bold text-slate-800 flex items-center"><i className='bx bx-plus-circle text-primary mr-2'></i> {isEditComp ? 'แก้ไขรายการแข่งขัน' : 'เพิ่มรายการแข่งขันใหม่'}</h3>
               <button onClick={() => setShowAddModal(false)} className="text-slate-400 hover:text-red-500 bg-slate-50 w-8 h-8 rounded-full flex items-center justify-center"><i className='bx bx-x text-2xl'></i></button>
             </div>
             
-            <form onSubmit={handleSaveCompetition} className="p-6 space-y-5">
+            <div className="overflow-y-auto p-6">
+              <form onSubmit={handleSaveCompetition} className="space-y-5">
               {/* Form fields same as before... */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
@@ -866,6 +870,40 @@ export default function AdminPage() {
                   </LocalizationProvider>
                 </div>
               </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div className="flex flex-col">
+                  <label className="block text-sm font-semibold text-slate-700 mb-1">วัน-เวลา เริ่มรับสมัคร</label>
+                  <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="th">
+                    <DateTimePicker 
+                      value={newComp.registerStartDate ? dayjs(newComp.registerStartDate) : null}
+                      onChange={(newValue: any) => setNewComp({...newComp, registerStartDate: newValue ? newValue.toISOString() : ''})}
+                      format="DD/MM/YYYY HH:mm"
+                      ampm={false}
+                      sx={{ 
+                        width: '100%', 
+                        backgroundColor: 'white',
+                        '& .MuiInputBase-root': { height: '42px', borderRadius: '0.5rem', fontSize: '0.875rem' } 
+                      }}
+                    />
+                  </LocalizationProvider>
+                </div>
+                <div className="flex flex-col">
+                  <label className="block text-sm font-semibold text-slate-700 mb-1">วัน-เวลา ปิดรับสมัคร</label>
+                  <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="th">
+                    <DateTimePicker 
+                      value={newComp.registerEndDate ? dayjs(newComp.registerEndDate) : null}
+                      onChange={(newValue: any) => setNewComp({...newComp, registerEndDate: newValue ? newValue.toISOString() : ''})}
+                      format="DD/MM/YYYY HH:mm"
+                      ampm={false}
+                      sx={{ 
+                        width: '100%', 
+                        backgroundColor: 'white',
+                        '& .MuiInputBase-root': { height: '42px', borderRadius: '0.5rem', fontSize: '0.875rem' } 
+                      }}
+                    />
+                  </LocalizationProvider>
+                </div>
+              </div>
 
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-1">กติกา (Rules)</label>
@@ -889,6 +927,7 @@ export default function AdminPage() {
                 </button>
               </div>
             </form>
+            </div>
           </div>
         </div>
       )}
@@ -971,15 +1010,6 @@ export default function AdminPage() {
                   <label className="block text-sm font-semibold text-slate-700 mb-1">รหัสการสมัคร</label>
                   <input type="text" className="w-full px-4 py-2 rounded-lg border border-slate-200 bg-slate-50 text-slate-500 cursor-not-allowed" value={newReg.registrationCode} readOnly />
                 </div>
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-1">สถานะ</label>
-                  <select className="w-full px-4 py-2 rounded-lg border border-slate-200" value={newReg.status} onChange={e => setNewReg({...newReg, status: e.target.value})}>
-                    <option value="pending">รอตรวจสอบ (Pending)</option>
-                    <option value="approved">อนุมัติแล้ว (Approved)</option>
-                    <option value="submitted">ส่งงานแล้ว (Submitted)</option>
-                    <option value="rejected">ปฏิเสธ (Rejected)</option>
-                  </select>
-                </div>
               </div>
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-1">ชื่อทีม (ถ้ามี)</label>
@@ -1048,6 +1078,13 @@ export default function AdminPage() {
                         </div>
                     );
 
+                    const rowHTML = (label: string, value: any) => (
+                        <div className="flex flex-col sm:flex-row py-3 border-b border-slate-100 last:border-0">
+                            <span className="text-slate-500 font-medium sm:w-1/3 shrink-0">{label}</span>
+                            <span className="text-slate-800 break-words markdown-content" dangerouslySetInnerHTML={renderHTML(value)} />
+                        </div>
+                    );
+
                     if (viewType === 'competition') {
                         return (
                             <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
@@ -1057,9 +1094,9 @@ export default function AdminPage() {
                                 {row("ระดับชั้น", viewData.level)}
                                 {row("รูปแบบ", viewData.type === 'team' ? 'ประเภททีม' : 'ประเภทเดี่ยว')}
                                 {viewData.type === 'team' && row("จำนวนสมาชิก (คน)", `${viewData.teamMin} - ${viewData.teamMax}`)}
-                                {row("รายละเอียด", viewData.description)}
-                                {row("กติกา", viewData.rules)}
-                                {row("เกณฑ์การให้คะแนน", viewData.judgingCriteria)}
+                                {rowHTML("รายละเอียด", viewData.description)}
+                                {rowHTML("กติกา", viewData.rules)}
+                                {rowHTML("เกณฑ์การให้คะแนน", viewData.judgingCriteria)}
                                 {row("สถานที่", viewData.location)}
                                 {row("วัน-เวลาแข่งขัน", formatThaiDateTime(viewData.competitionDate))}
                                 {row("เปิดรับสมัคร", viewData.registerOpen ? "เปิด" : "ปิด")}
@@ -1117,7 +1154,6 @@ export default function AdminPage() {
                         return (
                             <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
                                 <h4 className="text-lg font-bold text-primary mb-4 border-b pb-2">รหัสการสมัคร: <span className="text-slate-800">{viewData.registrationCode}</span></h4>
-                                {row("สถานะ", viewData.status === 'pending' ? <span className="px-2 py-1 bg-yellow-100 text-yellow-700 rounded-md text-xs font-bold">รอตรวจสอบ</span> : viewData.status === 'approved' ? <span className="px-2 py-1 bg-green-100 text-green-700 rounded-md text-xs font-bold">อนุมัติแล้ว</span> : viewData.status === 'submitted' ? <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-md text-xs font-bold">ส่งงานแล้ว</span> : <span className="px-2 py-1 bg-red-100 text-red-700 rounded-md text-xs font-bold">ปฏิเสธ</span>)}
                                 {row("วันที่สมัคร", formatThaiDateTime(viewData.createdAt))}
                                 {row("รหัสรายการแข่งขัน", viewData.competitionId)}
                                 {row("ชื่อทีม", viewData.teamName)}

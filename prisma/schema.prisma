@@ -44,11 +44,13 @@ model Competition {
   judgingCriteria String?  @map("judging_criteria") @db.Text
   location        String?
   competitionDate String?  @map("competition_date")
-  registerOpen    Boolean  @default(false) @map("register_open")
-  submissionOpen  Boolean  @default(false) @map("submission_open")
-  imageUrl        String?  @map("image_url")
-  createdAt       DateTime @default(now()) @map("created_at")
-  updatedAt       DateTime @updatedAt @map("updated_at")
+  registerOpen    Boolean   @default(false) @map("register_open")
+  registerStartDate DateTime? @map("register_start_date")
+  registerEndDate   DateTime? @map("register_end_date")
+  submissionOpen  Boolean   @default(false) @map("submission_open")
+  imageUrl        String?   @map("image_url")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
 
   registrations Registration[]
   submissions   Submission[]

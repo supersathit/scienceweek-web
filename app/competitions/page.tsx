@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { isRegistrationOpen } from '@/lib/competitionUtils';
 
 export default function Competitions() {
   const [allCompetitions, setAllCompetitions] = useState<any[]>([]);
@@ -35,6 +36,13 @@ export default function Competitions() {
     }
   };
 
+  const formatThaiDate = (dateString: string) => {
+    if (!dateString) return '-';
+    const d = new Date(dateString);
+    if (isNaN(d.getTime())) return '-';
+    return d.toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' });
+  };
+
   return (
     <>
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
@@ -63,7 +71,7 @@ export default function Competitions() {
                 <div className="col-span-full text-center py-10 text-slate-500"><p>ไม่พบรายการแข่งขันที่ตรงกับเงื่อนไข</p></div>
               ) : (
                 filtered.map(item => {
-                  const isRegOpen = item.registerOpen === true || String(item.registerOpen).toUpperCase() === 'TRUE';
+                  const isRegOpen = isRegistrationOpen(item);
                   const isSingle = parseInt(item.teamMax) === 1;
                   return (
                     <div key={item.id} className="glass-panel p-6 rounded-2xl flex flex-col hover:-translate-y-2 transition-transform duration-300">
@@ -85,10 +93,18 @@ export default function Competitions() {
                             </div>
                             <div className="flex items-center text-sm text-slate-600">
                                 <div className="w-8 h-8 rounded-full bg-pink-50 flex items-center justify-center mr-3 text-primary">
-                                    <i className='bx bx-group'></i>
+                                    <i className='bx bx-layer'></i>
                                 </div>
                                 <span>{item.level}</span>
                             </div>
+                            {(item.registerStartDate || item.registerEndDate) && (
+                            <div className="flex items-center text-sm text-slate-600">
+                                <div className="w-8 h-8 rounded-full bg-green-50 flex items-center justify-center mr-3 text-green-600">
+                                    <i className='bx bx-calendar'></i>
+                                </div>
+                                <span>รับสมัคร: {formatThaiDate(item.registerStartDate)} - {formatThaiDate(item.registerEndDate)}</span>
+                            </div>
+                            )}
                         </div>
                         <Link href={`/competitions/${item.id}`} className="btn btn-outline w-full text-center group">
                             ดูรายละเอียด <i className='bx bx-right-arrow-alt ml-1 group-hover:translate-x-1 transition-transform'></i>
