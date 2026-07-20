@@ -603,7 +603,7 @@ export default function AdminPage() {
                                             try {
                                                 const members = typeof reg.membersJson === 'string' ? JSON.parse(reg.membersJson) : reg.membersJson;
                                                 if (!Array.isArray(members) || members.length === 0) return '-';
-                                                return <ul className="list-disc pl-3 space-y-1">{members.map((m: any, i: number) => <li key={i}>{m.full_name}</li>)}</ul>;
+                                                return <ul className="list-disc pl-3 space-y-1">{members.map((m: any, i: number) => <li key={i}>{m.full_name} (ชั้น {m.class}/{m.room})</li>)}</ul>;
                                             } catch(e) { return '-'; }
                                         })() : '-'}
                                     </td>
